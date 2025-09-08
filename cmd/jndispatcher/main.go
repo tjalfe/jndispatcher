@@ -8,10 +8,10 @@ import (
 	"github.com/tjalfe/pcrypt"
 )
 
-// EncryptPassword prompts the user for a password and encrypts it using pcrypt.
+// PromptForPassword prompts the user for a password and encrypts it using pcrypt.
 // The encrypted password is used in config yaml file so that the real password is not stored in plaintext.
 func PromptForPassword() error {
-	crypt, err := pcrypt.Init(PCRYPT_INIT)
+	crypt, err := pcrypt.Init(pcryptInit)
 	if err != nil {
 		return err
 	}
