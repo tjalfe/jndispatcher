@@ -1,0 +1,14 @@
+---
+message_types:
+  - name: "type1"
+    input_topic: "topic1"
+    output_topic: 
+      - "topic1a" 
+      - "topic1b"
+  - name: "type2"
+    input_topic: "topic2"
+    output_topic: 
+      - "topic2a"
+      - "topic2b"
+
+  
