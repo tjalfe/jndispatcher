@@ -1,0 +1,9 @@
+---
+kafka1:
+  kafka-servers: 
+    - 172.31.10.200:9095
+    - 172.31.10.200:9095
+  kafka-server-ca: ./certs/ca.pem
+  kafka-topic: test-topic
+  kafka-auth-certificate-store: ./certs/producer.p12
+  kafka-auth-certificate-store-password: 26BPzzBChL78DP36qbq1r0KfHlRq8cYrYkUuqo/uKCmg8NA25lPE503cQ7neCtgqqjTlK+tRMPE7nfi185f8qOnl+jJ5vW5V6oaxl2gz
