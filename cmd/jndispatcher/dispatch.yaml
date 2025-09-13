@@ -1,14 +1,16 @@
 ---
 message_types:
-  - name: "type1"
+  - message_type: "type1"
     input_topic: "topic1"
-    output_topic: 
-      - "topic1a" 
-      - "topic1b"
-  - name: "type2"
+    input_kafka: "kafkaserver"
+    output_topics: 
+      - output_topic: "topic1a" 
+        output_kafka: "kafkaserver"
+      - output_topic: "topic1b" 
+        output_kafka: "kafkaserver"
+  - message_type: "type2"
     input_topic: "topic2"
-    output_topic: 
-      - "topic2a"
-      - "topic2b"
-
-  
+    input_kafka: "kafkaserver"
+    output_topics: 
+      - output_topic: "topic2a" 
+        output_kafka: "kafkaserver"
