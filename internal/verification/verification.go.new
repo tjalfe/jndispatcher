@@ -1,0 +1,32 @@
+package verification
+
+import (
+	"crypto/x509"
+	"fmt"
+	"go/types"
+	"os"
+)
+
+func generateTrustCaPool(config types.Config) (*x509.CertPool, error) {
+	// Create empty CA pool
+	certPool := x509.NewCertPool()
+	if config.TrustServerCa {
+		// Add system CAs to the pool if configured to do so
+		var err error
+		certPool, err = x509.SystemCertPool()
+		if err != nil {
+			return nil, fmt.Errorf("error loading system CA certificates: %w", err)
+		}
+	}
+	// Add extra CAs from config
+	for _, caPath := range config.TrustExtraCa {
+		caCert, err := os.ReadFile(caPath)
+		if err != nil {
+			return nil, fmt.Errorf("error reading extra CA certificate %s: %w", caPath, err)
+		}
+		if ok := certPool.AppendCertsFromPEM(caCert); !ok {
+			return nil, fmt.Errorf("error appending extra CA certificate %s to pool", caPath)
+		}
+	}
+	return certPool, nil
+}

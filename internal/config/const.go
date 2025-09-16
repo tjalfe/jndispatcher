@@ -1,7 +1,6 @@
 package config
 
 const (
-	ConfigPath      = "./"
-	DispatcherConf  = ConfigPath + "dispatcher.yaml"
-	KafkaServerConf = ConfigPath + "kafkaservers.yaml"
+	ConfigPath     = "./"
+	ConfigYamlFile = ConfigPath + "jndispatcher.yaml"
 )

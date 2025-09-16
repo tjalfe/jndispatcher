@@ -1,34 +1,18 @@
 package config
 
 import (
+	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/tjalfe/jndispatcher/internal/types"
 
 	"github.com/tjalfe/pcrypt"
 	"github.com/twmb/franz-go/pkg/kgo"
-	"gopkg.in/yaml.v3"
 	"software.sslmate.com/src/go-pkcs12"
 )
-
-// ReadKafkaConfigs reads a YAML file and unmarshals it into an array of KafkaClusterConfig structs.
-func readKafkaConfigs() ([]KafkaClusterConfig, error) {
-	yamlFile, err := os.ReadFile(KafkaServerConf)
-	if err != nil {
-		return nil, fmt.Errorf("error reading YAML file: %w", err) //Using %w for error wrapping
-	}
-
-	var configs []KafkaClusterConfig
-
-	err = yaml.Unmarshal(yamlFile, &configs)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshaling YAML: %w", err) //Using %w for error wrapping
-	}
-
-	return configs, nil
-}
 
 func readPkcs12(p12Path string, password string) (interface{}, *x509.Certificate, []*x509.Certificate, error) {
 	// Decrypt the password for the PKCS#12 file
@@ -53,41 +37,66 @@ func readPkcs12(p12Path string, password string) (interface{}, *x509.Certificate
 	return privateKey, certificate, certificateChain, nil
 }
 
-func initKafkaClient(config KafkaClusterConfig) (*kgo.Client, error) {
-	// privateKey, certificate, certificateChain, err := readPkcs12(config.KafkaAuthCertificateStore, config.KafkaAuthCertificateStorePassword)
-	fmt.Printf("Cluster name: %s\n", config.Name)
-	_, certificate, certificateChain, err := readPkcs12(config.KafkaAuthCertificateStore, config.KafkaAuthCertificateStorePassword)
+func generateRootCAPool(config types.Config) (*x509.CertPool, error) {
+	certPool, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, fmt.Errorf("error loading system CA certificates: %w", err)
+	}
+	if config.KafkaServerCA != "" {
+		caCert, err := os.ReadFile(config.KafkaServerCA)
+		if err != nil {
+			return nil, fmt.Errorf("error reading Kafka server CA certificate %s: %w", config.KafkaServerCA, err)
+		}
+		if ok := certPool.AppendCertsFromPEM(caCert); !ok {
+			return nil, fmt.Errorf("error appending Kafka server CA certificate %s to pool", config.KafkaServerCA)
+		}
+	}
+	return certPool, nil
+}
+
+func InitKafkaClient(config types.Config) (*kgo.Client, error) {
+	privateKey, clientCertificate, clientCertificateChain, err := readPkcs12(config.KafkaAuthCertificateStore, config.KafkaAuthCertificateStorePassword)
 	if err != nil {
 		return nil, fmt.Errorf("error reading PKCS#12 file: %w", err)
 	}
-	fmt.Printf("Certificate subject: %s\n", certificate.Subject)
-	for _, cert := range certificateChain {
-		fmt.Printf("\tCertificate in chain subject: %s\n", cert.Subject)
-	}
-	fmt.Println()
-	return nil, nil
-}
 
-func getKafkaClients() (map[string]*kgo.Client, error) {
-	// Read Kafka configurations from the YAML file
-	kafkaConfigs, err := readKafkaConfigs()
+	var kafkaClientAuth tls.Certificate
+	kafkaClientAuth.PrivateKey = privateKey
+	kafkaClientAuth.Certificate = append(kafkaClientAuth.Certificate, clientCertificate.Raw)
+	for _, cert := range clientCertificateChain {
+		kafkaClientAuth.Certificate = append(kafkaClientAuth.Certificate, cert.Raw)
+	}
+
+	rootCA, err := generateRootCAPool(config)
 	if err != nil {
-		return nil, fmt.Errorf("error reading Kafka configs: %w", err)
+		return nil, fmt.Errorf("error generating root CA pool: %w", err)
 	}
 
-	//kafkaClient := make(map[string]*kgo.Client)
-	for _, config := range kafkaConfigs {
-		_, err = initKafkaClient(config)
-		if err != nil {
-			return nil, fmt.Errorf("error initializing Kafka client for cluster %s: %w", config.Name, err)
-		}
-
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{kafkaClientAuth},
+		RootCAs:      rootCA,
 	}
 
-	// Print names of clusters
-	for _, cluster := range kafkaConfigs {
-		fmt.Println(cluster.Name)
+	opts := []kgo.Opt{
+		kgo.SeedBrokers(config.KafkaServers...),
+		kgo.ConsumeTopics(config.InputTopic),
+		kgo.ConsumerGroup(config.KafkaConsumerGroup),
+		kgo.DialTLSConfig(tlsConfig),
+		kgo.DialTimeout(3 * time.Second),
+		kgo.ProducerBatchCompression(kgo.ZstdCompression(), kgo.SnappyCompression(), kgo.NoCompression()),
+		kgo.RequireStableFetchOffsets(),
+		kgo.TransactionTimeout(10 * time.Second),
+		kgo.RebalanceTimeout(30 * time.Second),
 	}
 
-	return nil, nil
+	// if debug {
+	// 	opts = append(opts, kgo.WithLogger(&stdoutLogger{}))
+	// }
+
+	client, err := kgo.NewClient(opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create kafka client: %v", err)
+	}
+
+	return client, nil
 }

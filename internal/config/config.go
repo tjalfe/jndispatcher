@@ -1,31 +1,15 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
 
-type KafkaClusterConfig struct {
-	Name                              string   `yaml:"name"`
-	KafkaServers                      []string `yaml:"kafka-servers"`
-	KafkaServerCA                     string   `yaml:"kafka-server-ca"`
-	KafkaAuthCertificateStore         string   `yaml:"kafka-auth-certificate-store"`
-	KafkaAuthCertificateStorePassword string   `yaml:"kafka-auth-certificate-store-password"`
-}
+	"github.com/tjalfe/jndispatcher/internal/types"
+)
 
-func ReadConfig() ([]KafkaClusterConfig, error) {
-	// Read dispatcher config file
-	routes, err := readDispatcherConfigs()
+func ReadConfig() (types.Config, error) {
+	config, err := readConfig()
 	if err != nil {
-		return nil, fmt.Errorf("error reading dispatcher configs: %w", err)
+		return types.Config{}, fmt.Errorf("error reading config: %w", err)
 	}
-
-	for _, route := range routes.MessageRoute {
-		fmt.Printf("Route for message type: %s\n", route.MessageType)
-	}
-
-	// Read config file containing Kafka cluster definitions
-	//	KafkaConfigs, err := getKafkaClients()
-	_, err = getKafkaClients()
-	if err != nil {
-		return nil, fmt.Errorf("error reading Kafka configs: %w", err)
-	}
-	return nil, nil
+	return config, nil
 }
