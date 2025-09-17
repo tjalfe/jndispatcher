@@ -1,0 +1,20 @@
+---
+  kafka-servers: 
+    - 172.31.10.200:9095
+    - 172.31.10.200:9095
+  kafka-server-ca: ./certs/ca.pem
+  kafka-auth-certificate-store: ./certs/consumer.p12
+  kafka-auth-certificate-store-password: PASSWORD
+  input-topic: input_topic
+  kafka-consumer-group: groupname
+  trust-server-ca: true
+  trust-extra-ca: 
+    - ./certs/extra-ca.pem
+  message_types:
+    - message_type: type1
+      output_topic: 
+        - output_topic1
+        - output_topic2
+    - message_type: type2
+      output_topic: 
+        - output_topic3
