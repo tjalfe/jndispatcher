@@ -3,14 +3,16 @@ package types
 import _ "embed"
 
 // Create a file named internal/types/pcryptinit.secret
-// The file should contain a 32 bytes long, random string used for encryption initialization.
+// The file should contain a 32 bytes long, random string encoded into base64used.
+// This is used for encryption initialization.
+// Sample command to generate such a string: `openssl rand -base64 32 > internal/types/pcryptinit.secret`
 // This file should be ignored by git (add it to .gitignore).
 // The content of the file will be embedded into the binary at compile time.
 // Make sure to keep this file secure and do not share it publicly.
 // If the file is lost, and project is recompiled any data encrypted with it cannot be decrypted.
 //
 //go:embed pcryptinit.secret
-var PcryptInit string
+var PcryptInit []byte
 
 type Config struct {
 	KafkaServers                      []string      `yaml:"kafka-servers"`
