@@ -20,7 +20,7 @@ func readPkcs12(p12Path string, password string) (interface{}, *x509.Certificate
 	if err != nil {
 		return nil, &x509.Certificate{}, nil, err
 	}
-	decrypted_password, err := pcrypt.Decrypt(decrypter, password)
+	decrypted_password, err := decrypter.DecryptBase64(password)
 	if err != nil {
 		return nil, &x509.Certificate{}, nil, fmt.Errorf("error decrypting password for %s: %w", p12Path, err)
 	}
@@ -30,7 +30,7 @@ func readPkcs12(p12Path string, password string) (interface{}, *x509.Certificate
 	if err != nil {
 		return nil, &x509.Certificate{}, nil, fmt.Errorf("error reading p12 file %s: %w", p12Path, err)
 	}
-	privateKey, certificate, certificateChain, err := pkcs12.DecodeChain(p12Data, decrypted_password)
+	privateKey, certificate, certificateChain, err := pkcs12.DecodeChain(p12Data, string(decrypted_password))
 	if err != nil {
 		return nil, &x509.Certificate{}, nil, fmt.Errorf("error decoding p12 file %s: %w", p12Path, err)
 	}

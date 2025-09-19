@@ -3,9 +3,8 @@ package types
 import _ "embed"
 
 // Create a file named internal/types/pcryptinit.secret
-// The file should contain a 32 bytes long, random string encoded into base64used.
-// This is used for encryption initialization.
-// Sample command to generate such a string: `openssl rand -base64 32 > internal/types/pcryptinit.secret`
+// The file should contain a 32 bytes random bytes. This is used for encryption initialization.
+// Sample command to generate such a string: `openssl rand 32 > internal/types/pcryptinit.secret`
 // This file should be ignored by git (add it to .gitignore).
 // The content of the file will be embedded into the binary at compile time.
 // Make sure to keep this file secure and do not share it publicly.

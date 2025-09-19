@@ -20,7 +20,7 @@ func PromptForPassword() error {
 	if err != nil {
 		return err
 	}
-	err = pcrypt.Prompt(crypt)
+	err = crypt.Prompt()
 	if err != nil {
 		return err
 	}
