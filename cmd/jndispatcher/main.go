@@ -17,6 +17,7 @@ import (
 // The encrypted password is used in config yaml file so that the real password is not stored in plaintext.
 func PromptForPassword() error {
 	crypt, err := pcrypt.Init(types.PcryptInit)
+	defer crypt.Zero()
 	if err != nil {
 		return err
 	}

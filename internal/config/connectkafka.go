@@ -20,6 +20,7 @@ func readPkcs12(p12Path string, password string) (interface{}, *x509.Certificate
 	if err != nil {
 		return nil, &x509.Certificate{}, nil, err
 	}
+	defer decrypter.Zero() // Ensure sensitive data is cleared from memory
 	decrypted_password, err := decrypter.DecryptBase64(password)
 	if err != nil {
 		return nil, &x509.Certificate{}, nil, fmt.Errorf("error decrypting password for %s: %w", p12Path, err)
