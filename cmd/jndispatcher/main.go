@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -9,6 +11,7 @@ import (
 	"github.com/tjalfe/jndispatcher/internal/arguments"
 	"github.com/tjalfe/jndispatcher/internal/config"
 	"github.com/tjalfe/jndispatcher/internal/types"
+	"github.com/tjalfe/jndispatcher/internal/verification"
 	"github.com/tjalfe/pcrypt"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
@@ -58,12 +61,37 @@ func main() {
 	}
 	defer kafkaClient.Close()
 
+	// Load pool of trusted CA certificates
+	trustedCaPool, err := verification.LoadTrustedCaPool(conf)
+
 	// Main loop to consume messages
 	for {
 		fetches := kafkaClient.PollFetches(context.Background())
 		fetches.EachRecord(func(record *kgo.Record) {
 			log.Printf("Received:")
-			fmt.Printf("%v\n\n", string(record.Value))
+			// Load the record.Value into JSON structure
+			var message types.Message
+			err := json.Unmarshal(record.Value, &message)
+			if err != nil {
+				log.Printf("Error unmarshaling message: %v", err)
+				//	return
+			}
+			signingCert, err := x509.ParseCertificate(message.Certificate)
+			if err != nil {
+				log.Printf("Error parsing signing certificate: %v", err)
+				//	return
+			}
+			// Verify the signing certificate
+			CertOK := verification.VerifyTrustSigningCertificate(signingCert, trustedCaPool)
+			if CertOK != nil {
+				log.Printf("Error verifying signing certificate: %v", CertOK)
+			} else {
+				log.Printf("Signing certificate is valid and trusted")
+			}
+			// Pretty print the payload
+			fmt.Printf("%v\n\n", string(message.Payload))
+
+			//fmt.Printf("%v\n\n", string(record.Value))
 
 		})
 		if err := fetches.Err(); err != nil {

@@ -29,3 +29,14 @@ type MessageType struct {
 	MessageType string   `yaml:"message_type"`
 	OutputTopic []string `yaml:"output_topic"`
 }
+
+type Message struct {
+	MessageType           string `json:"message_type"`
+	TimestampShipped      string `json:"message_created_timestamp"`
+	MessageVerified       bool   `json:"message_verified"`
+	TimestampVerified     string `json:"message_verified_timestamp"`
+	CertificateCommonName string `json:"certificate_common_name"`
+	Certificate           []byte `json:"certificate"`
+	Signature             []byte `json:"signature"`
+	Payload               []byte `json:"payload"`
+}
