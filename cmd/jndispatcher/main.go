@@ -89,7 +89,8 @@ func main() {
 				log.Printf("Signing certificate is valid and trusted")
 			}
 			// Pretty print the payload
-			fmt.Printf("%v\n\n", string(message.Payload))
+			log.Printf("Signing Certificate: %v\n", string(message.CertificateCommonName))
+			log.Printf("Payload: %v\n\n", string(message.Payload))
 
 			//fmt.Printf("%v\n\n", string(record.Value))
 
