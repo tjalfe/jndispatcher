@@ -6,11 +6,12 @@ replace github.com/tjalfe/pcrypt => ../pcrypt
 
 replace github.com/tjalfe/randomstring => ../randomstring
 
-replace github.com/tjalfe/psign/pkg/psign => ../psign/pkg/psign
+replace github.com/tjalfe/psign => ../psign
 
 require (
 	github.com/spf13/pflag v1.0.10
 	github.com/tjalfe/pcrypt v0.0.0-00010101000000-000000000000
+	github.com/tjalfe/psign v0.0.0-00010101000000-000000000000
 	github.com/twmb/franz-go v1.19.5
 	gopkg.in/yaml.v3 v3.0.1
 	software.sslmate.com/src/go-pkcs12 v0.6.0

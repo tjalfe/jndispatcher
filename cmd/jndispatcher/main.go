@@ -13,6 +13,7 @@ import (
 	"github.com/tjalfe/jndispatcher/internal/types"
 	"github.com/tjalfe/jndispatcher/internal/verification"
 	"github.com/tjalfe/pcrypt"
+	"github.com/tjalfe/psign"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
@@ -63,6 +64,9 @@ func main() {
 
 	// Load pool of trusted CA certificates
 	trustedCaPool, err := verification.LoadTrustedCaPool(conf)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading pool of CA for verification of signed messages: %v\n", err)
+	}
 
 	// Main loop to consume messages
 	for {
@@ -88,12 +92,21 @@ func main() {
 			} else {
 				log.Printf("Signing certificate is valid and trusted")
 			}
-			// Pretty print the payload
+			// TO BE MADE: HANDELING OF MESSAGE
 			log.Printf("Signing Certificate: %v\n", string(message.CertificateCommonName))
+
+			// Verify signature
+			signerCertificate, _ := x509.ParseCertificate(message.Certificate)
+			signer, _ := psign.NewPverifier(signerCertificate.PublicKey)
+			signatureOK := signer.Verify(message.Payload, message.Signature)
+
+			if signatureOK != nil {
+				log.Printf("Signature NOT ok: %v\n", signatureOK)
+			} else {
+				log.Printf("Signature ok\n")
+			}
+
 			log.Printf("Payload: %v\n\n", string(message.Payload))
-
-			//fmt.Printf("%v\n\n", string(record.Value))
-
 		})
 		if err := fetches.Err(); err != nil {
 			log.Printf("Fetch error: %v", err)
