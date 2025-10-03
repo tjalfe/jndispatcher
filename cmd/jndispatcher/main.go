@@ -93,6 +93,7 @@ func main() {
 				log.Printf("Signing certificate is valid and trusted")
 			}
 			// TO BE MADE: HANDELING OF MESSAGE
+			log.Printf("Message UUID: %v\n", message.MessageUUID)
 			log.Printf("Signing Certificate: %v\n", string(message.CertificateCommonName))
 
 			// Verify signature

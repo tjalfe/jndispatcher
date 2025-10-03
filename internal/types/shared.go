@@ -1,6 +1,10 @@
 package types
 
-import _ "embed"
+import (
+	_ "embed"
+
+	"github.com/google/uuid"
+)
 
 // Create a file named internal/types/pcryptinit.secret
 // The file should contain a 32 bytes random bytes. This is used for encryption initialization.
@@ -31,12 +35,13 @@ type MessageType struct {
 }
 
 type Message struct {
-	MessageType           string `json:"message_type"`
-	TimestampShipped      string `json:"message_created_timestamp"`
-	MessageVerified       bool   `json:"message_verified"`
-	TimestampVerified     string `json:"message_verified_timestamp"`
-	CertificateCommonName string `json:"certificate_common_name"`
-	Certificate           []byte `json:"certificate"`
-	Signature             []byte `json:"signature"`
-	Payload               []byte `json:"payload"`
+	MessageUUID           uuid.UUID `json:"message_uuid"`
+	MessageType           string    `json:"message_type"`
+	TimestampShipped      string    `json:"message_created_timestamp"`
+	MessageVerified       bool      `json:"message_verified"`
+	TimestampVerified     string    `json:"message_verified_timestamp"`
+	CertificateCommonName string    `json:"certificate_common_name"`
+	Certificate           []byte    `json:"certificate"`
+	Signature             []byte    `json:"signature"`
+	Payload               []byte    `json:"payload"`
 }
