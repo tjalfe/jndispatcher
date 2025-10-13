@@ -85,8 +85,18 @@ func main() {
 				log.Printf("Error parsing signing certificate: %v", err)
 				//	return
 			}
+			signingCertChain := x509.NewCertPool()
+			for _, certInstance := range message.CertificateChain {
+				cert, err := x509.ParseCertificate(certInstance)
+				if err != nil {
+					log.Printf("Error parsing signing certificate chain: %v", err)
+					//	return
+				}
+				signingCertChain.AddCert(cert)
+			}
+
 			// Verify the signing certificate
-			CertOK := verification.VerifyTrustSigningCertificate(signingCert, trustedCaPool)
+			CertOK := verification.VerifyTrustSigningCertificate(signingCert, signingCertChain, trustedCaPool)
 			if CertOK != nil {
 				log.Printf("Error verifying signing certificate: %v", CertOK)
 			} else {
