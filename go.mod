@@ -4,11 +4,10 @@ go 1.24.3
 
 replace github.com/tjalfe/pcrypt => ../pcrypt
 
-replace github.com/tjalfe/randomstring => ../randomstring
-
 replace github.com/tjalfe/psign => ../psign
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/spf13/pflag v1.0.10
 	github.com/tjalfe/pcrypt v0.0.0-00010101000000-000000000000
 	github.com/tjalfe/psign v0.0.0-00010101000000-000000000000
@@ -18,7 +17,6 @@ require (
 )
 
 require (
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/twmb/franz-go/pkg/kmsg v1.11.2 // indirect
