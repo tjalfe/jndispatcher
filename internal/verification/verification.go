@@ -33,7 +33,7 @@ func LoadTrustedCaPool(config types.Config) (*x509.CertPool, error) {
 	return certPool, nil
 }
 
-func VerifyTrustSigningCertificate(signingCertificate *x509.Certificate, trustedCaPool *x509.CertPool) error {
+func VerifyTrustSigningCertificate(signingCertificate *x509.Certificate, signingCertChain *x509.CertPool, trustedCaPool *x509.CertPool) error {
 	// Start checking the notBefore and notAfter validity period
 	now := time.Now()
 	if now.Before(signingCertificate.NotBefore) {
@@ -44,7 +44,8 @@ func VerifyTrustSigningCertificate(signingCertificate *x509.Certificate, trusted
 	}
 	// Verify the signing certificate against the trusted CA pool
 	opts := x509.VerifyOptions{
-		Roots: trustedCaPool,
+		Roots:         trustedCaPool,
+		Intermediates: signingCertChain,
 	}
 	if _, err := signingCertificate.Verify(opts); err != nil {
 		return fmt.Errorf("signing certificate is not trusted: %w", err)

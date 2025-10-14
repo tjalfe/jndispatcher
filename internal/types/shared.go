@@ -42,6 +42,7 @@ type Message struct {
 	TimestampVerified     string    `json:"message_verified_timestamp"`
 	CertificateCommonName string    `json:"certificate_common_name"`
 	Certificate           []byte    `json:"certificate"`
+	CertificateChain      [][]byte  `json:"certificatChain"`
 	Signature             []byte    `json:"signature"`
 	Payload               []byte    `json:"payload"`
 }
